@@ -18,8 +18,20 @@ import {Link} from "react-router-dom";
 const pages = [
     {
         path: '/',
-        label: 'home'
-    }
+        label: 'Home'
+    },
+    {
+        path: '/about',
+        label: 'About'
+    },
+    {
+        path: '/contact',
+        label: 'Contact'
+    },
+    {
+        path: '/login',
+        label: 'Login'
+    },
     ];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
@@ -43,7 +55,7 @@ const Header:FC = () =>  {
     };
 
     return (
-        <AppBar position="static">
+        <AppBar className='header' position="static">
             <Container maxWidth="lg">
                 <Toolbar disableGutters>
                <Logo className={'w-10 h-10 mr-5'} title={'it-meet'}/>
