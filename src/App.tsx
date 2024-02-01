@@ -1,7 +1,8 @@
 import React from 'react';
+import {Route, Routes} from "react-router-dom";
 import './App.css';
 import Layout from "./components/Layout/Layout";
-import {Route, Routes} from "react-router-dom";
+
 import Main from "./pages/Main/Main";
 import Login from "./pages/Login/Login";
 

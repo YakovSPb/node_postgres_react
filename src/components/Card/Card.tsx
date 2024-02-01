@@ -7,12 +7,12 @@ import {FC} from "react";
 
 type CardPort = {
     title: string;
-    text: string;
+    content: string;
     link: string
 }
-const Card:FC<CardPort> = ({title, text, link}) => {
+const Card:FC<CardPort> = ({title, content, link}) => {
     return (
-        <Box>
+        <Box className='w-2/6'>
             <CardActionArea>
                 {/*<CardMedia*/}
                 {/*    component="img"*/}
@@ -25,7 +25,7 @@ const Card:FC<CardPort> = ({title, text, link}) => {
                         {title}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        {text}
+                        {content}
                     </Typography>
                 </CardContent>
             </CardActionArea>
