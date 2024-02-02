@@ -5,18 +5,11 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import {Link} from "react-router-dom";
 import {Grid} from "@mui/material";
-import FacebookIcon from '@mui/icons-material/Facebook';
-import TwitterIcon from '@mui/icons-material/Twitter';
-import InstagramIcon from '@mui/icons-material/Instagram';
 
 import { ReactComponent as Logo } from '../../assets/images/logo.svg';
+import {SOCIAL_MEDIA_LINKS} from "../../constants";
 
 const Footer:FC = () =>  {
-    const socialMediaLinks = {
-        facebook: '#',
-        twitter: '#',
-        instagram: '#',
-    };
 
     return (
         <Box
@@ -66,19 +59,15 @@ const Footer:FC = () =>  {
                         <Typography variant="subtitle1" color="text.primary" gutterBottom>
                             SOCIAL MEDIA
                         </Typography>
-                        <IconButton aria-label="Facebook" color="inherit" component="a" href={socialMediaLinks.facebook}>
-                            <FacebookIcon />
-                        </IconButton>
-                        <IconButton aria-label="Twitter" color="inherit" component="a" href={socialMediaLinks.twitter}>
-                            <TwitterIcon />
-                        </IconButton>
-                        <IconButton aria-label="Instagram" color="inherit" component="a" href={socialMediaLinks.instagram}>
-                            <InstagramIcon />
-                        </IconButton>
+                        {SOCIAL_MEDIA_LINKS.map(s=> (
+                            <IconButton aria-label={s.label} color="inherit" component="a" target={'_blank'} href={s.link}>
+                                {s.icon}
+                            </IconButton>
+                            ))}
                     </Grid>
                 </Grid>
                 <Typography variant="body2" color="text.secondary" align="center" sx={{ pt: 4 }}>
-                    © 2024 Yakov Kondratev . All rights reserved.
+                    © 2024 Yakov Kondratev . All rights reserved. itmeetm@gmail.com
                 </Typography>
             </Container>
         </Box>

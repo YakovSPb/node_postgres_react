@@ -14,6 +14,7 @@ import MenuItem from '@mui/material/MenuItem';
 
 import { ReactComponent as Logo } from '../../assets/images/logo.svg';
 import {Link} from "react-router-dom";
+import {queryClient} from "../../index";
 
 const pages = [
     {
@@ -38,6 +39,7 @@ const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 const Header:FC = () =>  {
     const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+    const authData = queryClient.getQueryData(["login"]);
 
     const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElNav(event.currentTarget);
@@ -148,7 +150,7 @@ const Header:FC = () =>  {
                     <Box sx={{ flexGrow: 0 }}>
                         <Tooltip title="Open settings">
                             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                                {authData? <Avatar alt="Remy Sharp" src="/images/avatar.png" />:<Avatar alt="Remy Sharp" src="" />}
                             </IconButton>
                         </Tooltip>
                         <Menu

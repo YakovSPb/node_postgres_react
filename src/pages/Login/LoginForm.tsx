@@ -1,33 +1,49 @@
 import * as React from 'react';
+import {useQuery} from "react-query";
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import {FC, useState} from "react";
+import {FC, useEffect, useState} from "react";
 import { Formik, Form } from 'formik';
-import * as Yup from 'yup';
-
-// TODO remove, this demo shouldn't need to reset the theme.
-const defaultTheme = createTheme();
+import * as yup from 'yup';
+import {useNavigate} from 'react-router-dom';
+import axios from "../../axios";
 
 type LoginFormProps = {
     toggle: () => void
 }
 
-const LoginForm:FC<LoginFormProps> = ({toggle}) => {
+type IData = {
+    email: string
+    password: string
+}
 
-    const FormikSchema = Yup.object().shape({
-        email: Yup.string().email('Invalid email').required('Required'),
-        password: Yup.string()
+const LoginForm:FC<LoginFormProps> = ({toggle}) => {
+    const navigate = useNavigate();
+    const [data, setDate] = useState<IData | null>(null)
+
+    const { data: dataAuth } = useQuery({
+        queryKey: ['login'],
+        enabled: !!(data?.email && data?.password),
+        queryFn: () => axios.post('/login', data).then((res) => res.data)
+    })
+
+    useEffect(() => {
+        if(dataAuth){
+            navigate('/')
+        }
+    }, [dataAuth]);
+
+
+    const FormikSchema = yup.object().shape({
+        email: yup.string().email('Invalid email').required('Required'),
+        password: yup.string()
         .min(5, 'Too Short!')
         .max(15, 'Too Long!')
         .required('Required'),
@@ -38,10 +54,7 @@ const LoginForm:FC<LoginFormProps> = ({toggle}) => {
                         email: '',
                         password: '' }}
                     validationSchema={FormikSchema}
-                    onSubmit={(values) => {
-
-                            console.log('value', values)
-                    }}
+                    onSubmit={(values) => setDate(values)}
                 >
                     {({
                           values,
@@ -74,39 +87,37 @@ const LoginForm:FC<LoginFormProps> = ({toggle}) => {
                                 <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
                                     <TextField
                                         margin="normal"
-                                        required
                                         fullWidth
                                         id="email"
                                         label="Email Address"
                                         name="email"
-                                        autoComplete="email"
-                                        autoFocus
+                                        error={!!(errors.email && touched.email && dirty)}
+                                        helperText={(errors.email && touched.email) && errors.email}
                                         value={values.email}
                                         onChange={handleChange}
                                     />
-                                    {errors.email && touched.email && errors.email}
                                     <TextField
                                         margin="normal"
-                                        required
                                         fullWidth
                                         name="password"
                                         label="Password"
                                         type="password"
                                         id="password"
-                                        autoComplete="current-password"
+                                        error={!!(errors.password && touched.password)}
+                                        helperText={errors.password}
                                         value={values.password}
                                         onChange={handleChange}
                                     />
-                                    {errors.password && touched.password && errors.password}
-                                    <FormControlLabel
-                                        control={<Checkbox value="remember" color="primary" />}
-                                        label="Remember me"
-                                    />
+                                    {/*<FormControlLabel*/}
+                                    {/*    control={<Checkbox value="remember" color="primary" />}*/}
+                                    {/*    label="Remember me"*/}
+                                    {/*/>*/}
                                     <Button
-                                        onClick={()=> handleSubmit()}
+                                        onClick={()=> {
+                                            handleSubmit()
+                                        }}
                                         fullWidth
                                         variant="contained"
-                                        disabled={isSubmitting || !dirty ||!isValid}
                                         sx={{ mt: 3, mb: 2 }}
                                     >
                                         Login
