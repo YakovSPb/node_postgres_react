@@ -7,7 +7,7 @@ import {Link} from "react-router-dom";
 import {Grid} from "@mui/material";
 
 import { ReactComponent as Logo } from '../../assets/images/logo.svg';
-import {SOCIAL_MEDIA_LINKS} from "../../constants";
+import {PAGES, SOCIAL_MEDIA_LINKS} from "../../constants";
 
 const Footer:FC = () =>  {
 
@@ -27,33 +27,18 @@ const Footer:FC = () =>  {
                     <Grid item xs={12} sm={6} md={3}>
                         <Box className='flex'>
                         <Logo className={'w-10 h-10 mr-5'} title={'it-meet'}/>
-                        <Typography
-                            variant="h6"
-                            noWrap
-                            component="a"
-                            href="#app-bar-with-responsive-menu"
-                            sx={{
-                                mr: 2,
-                                display: { xs: 'none', md: 'flex' },
-                                fontFamily: 'monospace',
-                                fontWeight: 700,
-                                letterSpacing: '.3rem',
-                                color: 'inherit',
-                                textDecoration: 'none',
-                            }}
+                        <Link
+                            to="/"
                         >
                             IT-MEET
-                        </Typography>
+                        </Link>
                         </Box>
                     </Grid>
                     <Grid item xs={6} sm={3} md={6}>
                         <Typography variant="subtitle1" color="text.primary" gutterBottom>
                             MENU
                         </Typography>
-                        <Link to="/" className="mr-4">Home</Link>
-                        <Link to="/about" className="mr-4">About</Link>
-                        <Link to="/contact" className="mr-4">Contact</Link>
-                        <Link to="/login" className="mr-4">Login</Link>
+                        {PAGES.map(page=><Link to={page.path}className="mr-4">{page.label}</Link>)}
                     </Grid>
                     <Grid item xs={6} sm={3} md={2}>
                         <Typography variant="subtitle1" color="text.primary" gutterBottom>

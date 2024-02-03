@@ -1,63 +1,60 @@
 import * as React from 'react';
 import {useQuery} from "react-query";
-import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+
 import Typography from '@mui/material/Typography';
-import {FC, useEffect, useState} from "react";
+import {FC, useState} from "react";
 import { Formik, Form } from 'formik';
 import * as yup from 'yup';
-import {useNavigate} from 'react-router-dom';
-import { useSnackbar} from "notistack";
-
 import axios from "../../axios";
-import {IDataLoginForm, ILoginFormField} from "../../types";
-import {LOGIN_FORM_FIELDS} from "../../constants";
+import {useSnackbar} from "notistack";
+import {
+    IAutData,
+    IDataPostForm,
+    IPostFormField,
+} from "../../types";
+import {POST_FORM_FIELDS} from "../../constants";
+import {queryClient} from "../../index";
 
-type LoginFormProps = {
-    toggle: () => void
-}
-
-const LoginForm:FC<LoginFormProps> = ({toggle}) => {
-    const navigate = useNavigate();
+const PostForm:FC = () => {
     const { enqueueSnackbar } = useSnackbar()
-    const [data, setDate] = useState<IDataLoginForm | null>(null)
+    const authData:IAutData|undefined = queryClient.getQueryData(["login"]);
+    const [data, setDate] = useState<IDataPostForm | null>(null)
 
-    const { data: dataAuth, isLoadingError } = useQuery({
+    const { data: dataPost, isLoading } = useQuery({
         queryKey: ['login'],
-        enabled: !!(data?.email && data?.password),
-        queryFn: () => axios.post('/login', data).then((res) => res.data).catch(()=>{
-            enqueueSnackbar('User not found', {variant: 'error'})
+        enabled: !!(data?.title && data?.content),
+        queryFn: () => axios.post('/post', {...data, userId: authData?.id}).then((res) => {
+            enqueueSnackbar('Post has been created', {variant: 'success'})
+            queryClient.refetchQueries(['posts'], { active: true })
+            setDate(null)
+           return res.data
+        }).catch(()=>{
+            enqueueSnackbar('Create post error', {variant: 'error'})
         })
     })
 
-    useEffect(() => {
-        if(dataAuth){
-            enqueueSnackbar(`Welcome ${dataAuth.name}!`, {variant: 'success'})
-            navigate('/')
-        }
-    }, [dataAuth]);
-
-
     const FormikSchema = yup.object().shape({
-        email: yup.string().email('Invalid email').required('Required'),
-        password: yup.string()
+        title: yup.string().required('Required').min(5, 'Too Short!').max(50, 'Too Long!'),
+        content: yup.string()
         .min(5, 'Too Short!')
-        .max(15, 'Too Long!')
+        .max(2000, 'Too Long!')
         .required('Required'),
     });
       return (
                 <Formik
                     initialValues={{
-                        email: '',
-                        password: '' }}
+                        title: '',
+                        content: '' }}
                     validationSchema={FormikSchema}
-                    onSubmit={(values) => setDate(values)}
+                    onSubmit={(values,{setSubmitting, resetForm}) => {
+                        setDate(values)
+                        resetForm()
+                        setSubmitting(false);
+                    }}
                 >
                     {({
                           values,
@@ -79,18 +76,18 @@ const LoginForm:FC<LoginFormProps> = ({toggle}) => {
                                     alignItems: 'center',
                                 }}
                             >
-                                <Avatar sx={{m: 1, bgcolor: 'secondary.main'}}>
-                                    <LockOutlinedIcon/>
-                                </Avatar>
-                                <Typography component="h1" variant="h5">Login</Typography>
+                                <Typography component="h1" variant="h5">Add new post</Typography>
                                 <Box component="form" onSubmit={handleSubmit} noValidate sx={{mt: 1}}>
-                                    {LOGIN_FORM_FIELDS.map((field:ILoginFormField)=> (
+                                    {POST_FORM_FIELDS.map((field:IPostFormField)=> (
                                         <TextField
                                             margin="normal"
                                             fullWidth
                                             id={field.key}
                                             label={field.label}
                                             name={field.key}
+                                            multiline={!!field.type}
+                                            rows={field.type && 4}
+                                            maxRows={field.type && 8}
                                             autoComplete={field.key}
                                             error={!!(errors[field.key] && touched[field.key] && dirty)}
                                             helperText={(errors[field.key] && touched[field.key]) && errors[field.key]}
@@ -98,32 +95,17 @@ const LoginForm:FC<LoginFormProps> = ({toggle}) => {
                                             onChange={handleChange}
                                         />
                                     ))}
-                                    {/*<FormControlLabel*/}
-                                    {/*    control={<Checkbox value="remember" color="primary" />}*/}
-                                    {/*    label="Remember me"*/}
-                                    {/*/>*/}
                                     <Button
                                         onClick={() => {
                                             handleSubmit()
                                         }}
+                                        disabled={isLoading}
                                         fullWidth
                                         variant="contained"
                                         sx={{mt: 3, mb: 2}}
                                     >
-                                        Login
+                                        Add post
                                     </Button>
-                                    <Grid container>
-                                        <Grid item xs>
-                                            <Link href="#" variant="body2">
-                                                Forgot password?
-                                            </Link>
-                                        </Grid>
-                                        <Grid item>
-                                            <Link className={'cursor-pointer'} onClick={toggle} variant="body2">
-                                                Don't have an account? Register
-                                            </Link>
-                                        </Grid>
-                                    </Grid>
                                 </Box>
                             </Box>
                         </Form>
@@ -132,4 +114,4 @@ const LoginForm:FC<LoginFormProps> = ({toggle}) => {
       );
 }
 
-export default LoginForm
+export default PostForm

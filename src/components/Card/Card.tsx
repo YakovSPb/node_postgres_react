@@ -12,7 +12,7 @@ type CardPort = {
 }
 const Card:FC<CardPort> = ({title, content, link}) => {
     return (
-        <Box className='w-2/6'>
+        <Box className='w-2/6 mb-4'>
             <CardActionArea>
                 {/*<CardMedia*/}
                 {/*    component="img"*/}

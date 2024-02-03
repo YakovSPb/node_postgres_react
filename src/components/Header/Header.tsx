@@ -15,26 +15,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { ReactComponent as Logo } from '../../assets/images/logo.svg';
 import {Link} from "react-router-dom";
 import {queryClient} from "../../index";
-
-const pages = [
-    {
-        path: '/',
-        label: 'Home'
-    },
-    {
-        path: '/about',
-        label: 'About'
-    },
-    {
-        path: '/contact',
-        label: 'Contact'
-    },
-    {
-        path: '/login',
-        label: 'Login'
-    },
-    ];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
+import {PAGES, SETTINGS} from "../../constants";
 
 const Header:FC = () =>  {
     const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
@@ -61,23 +42,9 @@ const Header:FC = () =>  {
             <Container maxWidth="lg">
                 <Toolbar disableGutters>
                <Logo className={'w-10 h-10 mr-5'} title={'it-meet'}/>
-                    <Typography
-                        variant="h6"
-                        noWrap
-                        component="a"
-                        href="#app-bar-with-responsive-menu"
-                        sx={{
-                            mr: 2,
-                            display: { xs: 'none', md: 'flex' },
-                            fontFamily: 'monospace',
-                            fontWeight: 700,
-                            letterSpacing: '.3rem',
-                            color: 'inherit',
-                            textDecoration: 'none',
-                        }}
-                    >
+                    <Link className={'mr-5 font-bold text-xl'} to="/">
                         IT-MEET
-                    </Typography>
+                    </Link>
 
                     <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
                         <IconButton
@@ -108,33 +75,16 @@ const Header:FC = () =>  {
                                 display: { xs: 'block', md: 'none' },
                             }}
                         >
-                            {pages.map((page) => (
+                            {PAGES.map((page) => (
                                 <MenuItem key={page.label} onClick={handleCloseNavMenu}>
                                     <Link to={page.path}><Typography textAlign="center">{page.label}</Typography></Link>
                                 </MenuItem>
                             ))}
                         </Menu>
                     </Box>
-                    <Typography
-                        variant="h5"
-                        noWrap
-                        component="a"
-                        href="#app-bar-with-responsive-menu"
-                        sx={{
-                            mr: 2,
-                            display: { xs: 'flex', md: 'none' },
-                            flexGrow: 1,
-                            fontFamily: 'monospace',
-                            fontWeight: 700,
-                            letterSpacing: '.3rem',
-                            color: 'inherit',
-                            textDecoration: 'none',
-                        }}
-                    >
-                        LOGO
-                    </Typography>
+                    <Link to="/">LOGO</Link>
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-                        {pages.map((page) => (
+                        {PAGES.map((page) => (
                             <Link key={page.label} to={page.path}>
                             <Button
 
@@ -169,9 +119,11 @@ const Header:FC = () =>  {
                             open={Boolean(anchorElUser)}
                             onClose={handleCloseUserMenu}
                         >
-                            {settings.map((setting) => (
-                                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                                    <Typography textAlign="center">{setting}</Typography>
+                            {SETTINGS.map((setting) => (
+                                <MenuItem key={setting.path} >
+                                    <Link to={setting.path}>
+                                        <Typography textAlign="center">{setting.label}</Typography>
+                                    </Link>
                                 </MenuItem>
                             ))}
                         </Menu>

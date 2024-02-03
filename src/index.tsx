@@ -1,4 +1,5 @@
 import React from 'react';
+import { SnackbarProvider } from 'notistack'
 import {Provider} from 'react-redux'
 import ReactDOM from 'react-dom/client';
 import './index.css';
@@ -20,10 +21,12 @@ const root = ReactDOM.createRoot(
 root.render(
     <BrowserRouter>
         <QueryClientProvider client={queryClient}>
-        <Provider store={store}>
-            <App />
-        </Provider>
-            <ReactQueryDevtools initialIsOpen={true} />
+            <Provider store={store}>
+                <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                <App/>
+                </SnackbarProvider>
+            </Provider>
+            <ReactQueryDevtools initialIsOpen={true}/>
         </QueryClientProvider>
     </BrowserRouter>
 );

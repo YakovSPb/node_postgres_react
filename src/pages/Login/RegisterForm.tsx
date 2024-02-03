@@ -10,36 +10,59 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
 import {FC, useState} from "react";
-import { Formik } from 'formik';
+import {Form, Formik} from 'formik';
+import * as yup from "yup";
+import {useNavigate} from "react-router-dom";
+import {useSnackbar} from "notistack";
+import {useQuery} from "react-query";
 
-// TODO remove, this demo shouldn't need to reset the theme.
-const defaultTheme = createTheme();
+import {IDataRegisterForm, IRegisterFormField} from "../../types";
+import axios from "../../axios";
+import {REGISTER_FORM_FIELDS} from "../../constants";
 
 type LoginFormProps = {
     toggle: () => void
 }
 
 const LoginForm:FC<LoginFormProps> = ({toggle}) => {
+    const navigate = useNavigate();
+    const { enqueueSnackbar } = useSnackbar()
+    const [data, setDate] = useState<IDataRegisterForm | null>(null)
+
+    const { data: dataAuth } = useQuery({
+        queryKey: ['register'],
+        enabled: !!(data?.email && data?.password),
+        queryFn: () => axios.post('/singup', data).then((res) => {
+            enqueueSnackbar('User has been register', {variant: 'success'})
+            toggle()
+           return res.data
+        }).catch(()=>{
+            enqueueSnackbar('Mail is already in use', {variant: 'error'})
+        })
+    })
+
+    const FormikSchema = yup.object().shape({
+        name: yup.string().required('Required'),
+        email: yup.string().email('Invalid email').required('Required'),
+        password: yup.string()
+            .min(5, 'Too Short!')
+            .max(15, 'Too Long!')
+            .required('Required'),
+        repeatPassword: yup.string()
+            .required('')
+            .oneOf([yup.ref('password')], 'Passwords must match')
+    });
       return (
           <Formik
-              initialValues={{ email: '', password: '' }}
-              validate={values => {
-                  // const errors = {};
-                  // if (!values.email) {
-                  //     errors.email = 'Required';
-                  // } else if (
-                  //     !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
-                  // ) {
-                  //     errors.email = 'Invalid email address';
-                  // }
-                  // return errors;
-              }}
-              onSubmit={(values, { setSubmitting }) => {
-                console.log('hey')
-              }}
+              initialValues={{
+                  name: '',
+                  email: '',
+                  password: '',
+                  repeatPassword: ','
+          }}
+              validationSchema={FormikSchema}
+              onSubmit={(values) => setDate(values)}
           >
               {({
                     values,
@@ -49,9 +72,12 @@ const LoginForm:FC<LoginFormProps> = ({toggle}) => {
                     handleBlur,
                     handleSubmit,
                     isSubmitting,
+                    dirty,
                     /* and other goodies */
                 }) => (
-                  <form onSubmit={handleSubmit}>
+                  <Form onSubmit={(e)=> {
+                      e.preventDefault()
+                  }}>
                       <CssBaseline />
                       <Box
                           sx={{
@@ -66,52 +92,28 @@ const LoginForm:FC<LoginFormProps> = ({toggle}) => {
                           </Avatar>
                           <Typography component="h1" variant="h5">Register</Typography>
                           <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-                              <TextField
-                                  margin="normal"
-                                  required
-                                  fullWidth
-                                  id="name"
-                                  label="Name"
-                                  name="name"
-                                  autoComplete="name"
-                                  autoFocus
-                              />
-                              <TextField
-                                  margin="normal"
-                                  required
-                                  fullWidth
-                                  id="email"
-                                  label="Email Address"
-                                  name="email"
-                                  autoComplete="email"
-                                  autoFocus
-                              />
-                              <TextField
-                                  margin="normal"
-                                  required
-                                  fullWidth
-                                  name="password"
-                                  label="Password"
-                                  type="password"
-                                  id="password"
-                                  autoComplete="current-password"
-                              />
-                              <TextField
-                                  margin="normal"
-                                  required
-                                  fullWidth
-                                  name="repeatPassword"
-                                  label="Repeat password"
-                                  type="repeatPassword"
-                                  id="repeatPassword"
-                                  autoComplete="current-password"
-                              />
+                              {REGISTER_FORM_FIELDS.map((field:IRegisterFormField)=> (
+                                  <TextField
+                                      margin="normal"
+                                      fullWidth
+                                      id={field.key}
+                                      label={field.label}
+                                      name={field.key}
+                                      autoComplete={field.key}
+                                      error={!!(errors[field.key] && touched[field.key] && dirty)}
+                                      helperText={(errors[field.key] && touched[field.key]) && errors[field.key]}
+                                      value={values.name}
+                                      onChange={handleChange}
+                                  />
+                              ))}
                               <FormControlLabel
                                   control={<Checkbox value="remember" color="primary" />}
                                   label="Remember me"
                               />
                               <Button
-                                  type="submit"
+                                  onClick={() => {
+                                      handleSubmit()
+                                  }}
                                   fullWidth
                                   variant="contained"
                                   sx={{ mt: 3, mb: 2 }}
@@ -132,28 +134,7 @@ const LoginForm:FC<LoginFormProps> = ({toggle}) => {
                               </Grid>
                           </Box>
                       </Box>
-
-
-                      <input
-                          type="email"
-                          name="email"
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          value={values.email}
-                      />
-                      {errors.email && touched.email && errors.email}
-                      <input
-                          type="password"
-                          name="password"
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          value={values.password}
-                      />
-                      {errors.password && touched.password && errors.password}
-                      <button type="submit" disabled={isSubmitting}>
-                          Submit
-                      </button>
-                  </form>
+                  </Form>
               )}
           </Formik>
     );
