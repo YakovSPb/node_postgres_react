@@ -9,7 +9,7 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
-import {FC, useEffect, useState} from "react";
+import {FC, useState} from "react";
 import { Formik, Form } from 'formik';
 import * as yup from 'yup';
 import {useNavigate} from 'react-router-dom';
@@ -28,21 +28,17 @@ const LoginForm:FC<LoginFormProps> = ({toggle}) => {
     const { enqueueSnackbar } = useSnackbar()
     const [data, setDate] = useState<IDataLoginForm | null>(null)
 
-    const { data: dataAuth, isLoadingError } = useQuery({
+   useQuery({
         queryKey: ['login'],
         enabled: !!(data?.email && data?.password),
-        queryFn: () => axios.post('/login', data).then((res) => res.data).catch(()=>{
+        queryFn: () => axios.post('/login', data).then((res) => {
+            window.localStorage.setItem('token', res.data.token)
+            enqueueSnackbar(`Welcome ${res.data.name}!`, {variant: 'success'})
+            navigate('/')
+        }).catch(()=>{
             enqueueSnackbar('User not found', {variant: 'error'})
         })
     })
-
-    useEffect(() => {
-        if(dataAuth){
-            enqueueSnackbar(`Welcome ${dataAuth.name}!`, {variant: 'success'})
-            navigate('/')
-        }
-    }, [dataAuth]);
-
 
     const FormikSchema = yup.object().shape({
         email: yup.string().email('Invalid email').required('Required'),

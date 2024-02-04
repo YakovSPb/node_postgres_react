@@ -8,9 +8,9 @@ import {Grid} from "@mui/material";
 
 import { ReactComponent as Logo } from '../../assets/images/logo.svg';
 import {PAGES, SOCIAL_MEDIA_LINKS} from "../../constants";
+import {queryClient} from "../../index";
 
 const Footer:FC = () =>  {
-
     return (
         <Box
             className={'footer'}

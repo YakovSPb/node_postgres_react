@@ -1,6 +1,8 @@
 export type ICard = {
+    id: number
     title: string
     content: string
+    user_id: number
 }
 
 export type IAutData = {

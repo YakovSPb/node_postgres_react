@@ -13,15 +13,16 @@ import MenuIcon from '@mui/icons-material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 
 import { ReactComponent as Logo } from '../../assets/images/logo.svg';
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import {queryClient} from "../../index";
 import {PAGES, SETTINGS} from "../../constants";
+import {IAutData} from "../../types";
 
 const Header:FC = () =>  {
+    const navigate = useNavigate();
     const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
-    const authData = queryClient.getQueryData(["login"]);
-
+    const authData:IAutData|undefined = queryClient.getQueryData(["authme"]);
     const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElNav(event.currentTarget);
     };
@@ -35,6 +36,13 @@ const Header:FC = () =>  {
 
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
+    };
+
+    const logout = () => {
+        handleCloseNavMenu()
+        queryClient.removeQueries()
+        window.localStorage.removeItem('token')
+        navigate('/login')
     };
 
     return (
@@ -82,7 +90,6 @@ const Header:FC = () =>  {
                             ))}
                         </Menu>
                     </Box>
-                    <Link to="/">LOGO</Link>
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                         {PAGES.map((page) => (
                             <Link key={page.label} to={page.path}>
@@ -100,7 +107,10 @@ const Header:FC = () =>  {
                     <Box sx={{ flexGrow: 0 }}>
                         <Tooltip title="Open settings">
                             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                {authData? <Avatar alt="Remy Sharp" src="/images/avatar.png" />:<Avatar alt="Remy Sharp" src="" />}
+                                {authData? <>
+                                        <span className='text-white  text-base mr-4'>{authData.name}</span> <Avatar alt="Remy Sharp" src="/images/avatar.png" />
+                                    </>
+                                    :<Avatar alt="Remy Sharp" src="" />}
                             </IconButton>
                         </Tooltip>
                         <Menu
@@ -126,6 +136,13 @@ const Header:FC = () =>  {
                                     </Link>
                                 </MenuItem>
                             ))}
+                                {authData ?  <MenuItem><Typography onClick={logout} textAlign="center">Logout</Typography></MenuItem> :
+                                    <MenuItem>
+                                        <Link to='/login'>
+                                            <Typography textAlign="center">Login</Typography>
+                                        </Link>
+                                    </MenuItem>
+                                }
                         </Menu>
                     </Box>
                 </Toolbar>

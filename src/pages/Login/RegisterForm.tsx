@@ -26,11 +26,10 @@ type LoginFormProps = {
 }
 
 const LoginForm:FC<LoginFormProps> = ({toggle}) => {
-    const navigate = useNavigate();
     const { enqueueSnackbar } = useSnackbar()
     const [data, setDate] = useState<IDataRegisterForm | null>(null)
 
-    const { data: dataAuth } = useQuery({
+    useQuery({
         queryKey: ['register'],
         enabled: !!(data?.email && data?.password),
         queryFn: () => axios.post('/singup', data).then((res) => {
@@ -102,7 +101,7 @@ const LoginForm:FC<LoginFormProps> = ({toggle}) => {
                                       autoComplete={field.key}
                                       error={!!(errors[field.key] && touched[field.key] && dirty)}
                                       helperText={(errors[field.key] && touched[field.key]) && errors[field.key]}
-                                      value={values.name}
+                                      value={values[field.key]}
                                       onChange={handleChange}
                                   />
                               ))}
