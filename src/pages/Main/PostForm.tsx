@@ -1,41 +1,42 @@
 import * as React from 'react';
-import {useQuery} from "react-query";
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 
 import Typography from '@mui/material/Typography';
-import {FC, useState} from "react";
+import {FC, useRef, useState} from "react";
 import { Formik, Form } from 'formik';
 import * as yup from 'yup';
 import axios from "../../axios";
 import {useSnackbar} from "notistack";
 import {
-    IAutData,
-    IDataPostForm,
+    IAutData, ICard,
     IPostFormField,
 } from "../../types";
 import {POST_FORM_FIELDS} from "../../constants";
 import {queryClient} from "../../index";
 
-const PostForm:FC = () => {
-    const { enqueueSnackbar } = useSnackbar()
-    const authData:IAutData|undefined = queryClient.getQueryData(["login"]);
-    const [data, setDate] = useState<IDataPostForm | null>(null)
+type IPostFormProps = {
+    defaultData?:ICard
+    setIsEditModalOpen?: (value: boolean) => void
+}
 
-    const { data: dataPost, isLoading } = useQuery({
-        queryKey: ['login'],
-        enabled: !!(data?.title && data?.content),
-        queryFn: () => axios.post('/post', {...data, userId: authData?.id}).then((res) => {
-            enqueueSnackbar('Post has been created', {variant: 'success'})
-            queryClient.refetchQueries(['posts'], { active: true })
-            setDate(null)
-           return res.data
-        }).catch(()=>{
-            enqueueSnackbar('Create post error', {variant: 'error'})
-        })
-    })
+const PostForm:FC<IPostFormProps> = ({defaultData, setIsEditModalOpen}) => {
+    const { enqueueSnackbar } = useSnackbar()
+    const authData:IAutData|undefined = queryClient.getQueryData(["authme"]);
+    const [isLoading, setIsloading] = useState(false)
+    const fileRef = useRef(null);
+
+    const handleFileUpload = async () =>{
+        // @ts-ignore
+        const file = fileRef.current.files?.[0];
+        if(!file) return
+        const formData = new FormData()
+        formData.append('image', file);
+        const {data}= await axios.post('/upload', formData)
+        console.log('data', data)
+    }
 
     const FormikSchema = yup.object().shape({
         title: yup.string().required('Required').min(5, 'Too Short!').max(50, 'Too Long!'),
@@ -47,13 +48,37 @@ const PostForm:FC = () => {
       return (
                 <Formik
                     initialValues={{
-                        title: '',
-                        content: '' }}
+                        title: defaultData?.title || '',
+                        content: defaultData?.content || '' }}
                     validationSchema={FormikSchema}
                     onSubmit={(values,{setSubmitting, resetForm}) => {
-                        setDate(values)
+                        setIsloading(true)
+                            if(defaultData) {
+                            axios.put(`/post`, {data:{
+                                id: defaultData.id,
+                                ...values
+                                }}).then((res) => {
+                                enqueueSnackbar('Post has been updated', {variant: 'success'})
+                                queryClient.refetchQueries(['posts'], { active: true })
+                                if(setIsEditModalOpen) {
+                                    setIsEditModalOpen(false)
+                                }
+                                queryClient.refetchQueries(['posts'], { active: true })
+                            }).catch(()=>{
+                                enqueueSnackbar('Update post error', {variant: 'error'})
+                            })
+                            } else {
+                                axios.post('/post', {...values, userId: authData?.id}).then((res) => {
+                                    enqueueSnackbar('Post has been created', {variant: 'success'})
+                                    queryClient.refetchQueries(['posts'], { active: true })
+                                    return res.data
+                                }).catch(()=>{
+                                    enqueueSnackbar('Create post error', {variant: 'error'})
+                                })
+                        }
                         resetForm()
                         setSubmitting(false);
+                        setIsloading(false)
                     }}
                 >
                     {({
@@ -76,7 +101,7 @@ const PostForm:FC = () => {
                                     alignItems: 'center',
                                 }}
                             >
-                                <Typography component="h1" variant="h5">Add new post</Typography>
+                                <Typography component="h1" variant="h5">{defaultData ? 'Edit post' : 'Add new post'}</Typography>
                                 <Box component="form" onSubmit={handleSubmit} noValidate sx={{mt: 1}}>
                                     {POST_FORM_FIELDS.map((field:IPostFormField)=> (
                                         <TextField
@@ -96,16 +121,35 @@ const PostForm:FC = () => {
                                         />
                                     ))}
                                     <Button
-                                        onClick={() => {
-                                            handleSubmit()
-                                        }}
+                                        variant="contained"
+                                        component="label"
+                                        onClick={handleFileUpload}
+                                    >
+                                        Upload File
+                                        <input
+                                            type="file"
+                                            hidden
+                                            ref={fileRef}
+                                        />
+                                    </Button>
+
+                                    <Box className="flex justify-center">
+                                    <Button
+                                        onClick={() => handleSubmit()}
                                         disabled={isLoading}
-                                        fullWidth
+                                        fullWidth={!defaultData}
+                                        color={defaultData ? 'success' : 'secondary'}
                                         variant="contained"
                                         sx={{mt: 3, mb: 2}}
                                     >
-                                        Add post
+                                        {defaultData ? 'Edite' : 'Add'}  post
                                     </Button>
+                                    {setIsEditModalOpen && <Button
+                                        variant="contained"
+                                        sx={{mt: 3, mb: 2, ml:5}}
+                                        onClick={()=> setIsEditModalOpen(false)}
+                                    >Cancel</Button>}
+                                    </Box>
                                 </Box>
                             </Box>
                         </Form>

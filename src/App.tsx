@@ -10,6 +10,7 @@ import Contact from "./pages/Contact/Contact";
 import NoPage from "./pages/NoPage/NoPage";
 import {useQuery} from "react-query";
 import axios from "./axios";
+import Post from "./pages/Post/Post";
 
 function App() {
     const navigate = useNavigate();
@@ -30,6 +31,7 @@ function App() {
                   <Route path="/about" element={<About/>}/>
                   <Route path="/contact" element={<Contact/>}/>
                   <Route path="/login" element={<Login/>}/>
+                  <Route path="/post/:id" element={<Post/>}/>
                   <Route path="*" element={<NoPage/>}/>
               </Routes>
           </Layout>
