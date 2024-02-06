@@ -1,0 +1,1 @@
+export const formatBytes = (bytes: number):number => bytes  ? bytes / 1024 / 1024 : 0

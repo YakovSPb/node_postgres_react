@@ -5,7 +5,7 @@ import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 
 import Typography from '@mui/material/Typography';
-import {FC, useRef, useState} from "react";
+import {FC, useEffect, useState} from "react";
 import { Formik, Form } from 'formik';
 import * as yup from 'yup';
 import axios from "../../axios";
@@ -16,6 +16,7 @@ import {
 } from "../../types";
 import {POST_FORM_FIELDS} from "../../constants";
 import {queryClient} from "../../index";
+import FileDrop from "../../components/FileDrop/FilteDrop";
 
 type IPostFormProps = {
     defaultData?:ICard
@@ -26,17 +27,20 @@ const PostForm:FC<IPostFormProps> = ({defaultData, setIsEditModalOpen}) => {
     const { enqueueSnackbar } = useSnackbar()
     const authData:IAutData|undefined = queryClient.getQueryData(["authme"]);
     const [isLoading, setIsloading] = useState(false)
-    const fileRef = useRef(null);
+    const [selectedFile, setSelectedFile] = useState<any>(null)
 
     const handleFileUpload = async () =>{
+        if(!selectedFile) return
         // @ts-ignore
-        const file = fileRef.current.files?.[0];
-        if(!file) return
         const formData = new FormData()
-        formData.append('image', file);
-        const {data}= await axios.post('/upload', formData)
-        console.log('data', data)
+        formData.append('image', selectedFile);
+       return axios.post('/upload', formData)
     }
+
+    useEffect(() => {
+        console.log('selectedFile',selectedFile)
+    }, [selectedFile]);
+
 
     const FormikSchema = yup.object().shape({
         title: yup.string().required('Required').min(5, 'Too Short!').max(50, 'Too Long!'),
@@ -45,40 +49,47 @@ const PostForm:FC<IPostFormProps> = ({defaultData, setIsEditModalOpen}) => {
         .max(2000, 'Too Long!')
         .required('Required'),
     });
-      return (
+    return (
                 <Formik
                     initialValues={{
                         title: defaultData?.title || '',
-                        content: defaultData?.content || '' }}
+                        content: defaultData?.content || '',
+                    }}
                     validationSchema={FormikSchema}
                     onSubmit={(values,{setSubmitting, resetForm}) => {
                         setIsloading(true)
-                            if(defaultData) {
-                            axios.put(`/post`, {data:{
-                                id: defaultData.id,
-                                ...values
-                                }}).then((res) => {
-                                enqueueSnackbar('Post has been updated', {variant: 'success'})
-                                queryClient.refetchQueries(['posts'], { active: true })
-                                if(setIsEditModalOpen) {
-                                    setIsEditModalOpen(false)
-                                }
-                                queryClient.refetchQueries(['posts'], { active: true })
-                            }).catch(()=>{
-                                enqueueSnackbar('Update post error', {variant: 'error'})
+
+                            handleFileUpload().then(res=> {
+                                    console.log(res)
                             })
-                            } else {
-                                axios.post('/post', {...values, userId: authData?.id}).then((res) => {
-                                    enqueueSnackbar('Post has been created', {variant: 'success'})
-                                    queryClient.refetchQueries(['posts'], { active: true })
-                                    return res.data
-                                }).catch(()=>{
-                                    enqueueSnackbar('Create post error', {variant: 'error'})
-                                })
-                        }
-                        resetForm()
-                        setSubmitting(false);
-                        setIsloading(false)
+                        console.log('promise')
+
+                        //     if(defaultData) {
+                        //     axios.put(`/post`, {data:{
+                        //         id: defaultData.id,
+                        //         ...values
+                        //         }}).then((res) => {
+                        //         enqueueSnackbar('Post has been updated', {variant: 'success'})
+                        //         queryClient.refetchQueries(['posts'], { active: true })
+                        //         if(setIsEditModalOpen) {
+                        //             setIsEditModalOpen(false)
+                        //         }
+                        //         queryClient.refetchQueries(['posts'], { active: true })
+                        //     }).catch(()=>{
+                        //         enqueueSnackbar('Update post error', {variant: 'error'})
+                        //     })
+                        //     } else {
+                        //         axios.post('/post', {...values, userId: authData?.id}).then((res) => {
+                        //             enqueueSnackbar('Post has been created', {variant: 'success'})
+                        //             queryClient.refetchQueries(['posts'], { active: true })
+                        //             return res.data
+                        //         }).catch(()=>{
+                        //             enqueueSnackbar('Create post error', {variant: 'error'})
+                        //         })
+                        // }
+                        // resetForm()
+                        // setSubmitting(false);
+                        // setIsloading(false)
                     }}
                 >
                     {({
@@ -107,32 +118,29 @@ const PostForm:FC<IPostFormProps> = ({defaultData, setIsEditModalOpen}) => {
                                         <TextField
                                             margin="normal"
                                             fullWidth
-                                            id={field.key}
                                             label={field.label}
                                             name={field.key}
-                                            multiline={!!field.type}
-                                            rows={field.type && 4}
-                                            maxRows={field.type && 8}
-                                            autoComplete={field.key}
                                             error={!!(errors[field.key] && touched[field.key] && dirty)}
                                             helperText={(errors[field.key] && touched[field.key]) && errors[field.key]}
                                             value={values[field.key]}
                                             onChange={handleChange}
                                         />
                                     ))}
-                                    <Button
-                                        variant="contained"
-                                        component="label"
-                                        onClick={handleFileUpload}
-                                    >
-                                        Upload File
-                                        <input
-                                            type="file"
-                                            hidden
-                                            ref={fileRef}
-                                        />
-                                    </Button>
 
+                                    <Box sx={{mt: 2}}>
+                                    <TextField
+                                        variant={"outlined"}
+                                        fullWidth
+                                        label={'Image file'}
+                                        name={'fileName'}
+                                        value={selectedFile?.name}
+                                        InputLabelProps={{ shrink: true }}
+                                        InputProps={{
+                                            readOnly: true,
+                                        }}
+                                      />
+                                    <FileDrop selectedFile={selectedFile} setSelectedFile={setSelectedFile} />
+                                    </Box>
                                     <Box className="flex justify-center">
                                     <Button
                                         onClick={() => handleSubmit()}

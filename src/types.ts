@@ -44,3 +44,5 @@ export type IPostFormField = {
     label: string
     type?: string
 }
+
+export type IGetBase64 = (file: Blob) => Promise<string>
