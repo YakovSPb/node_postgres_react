@@ -28,19 +28,30 @@ const PostForm:FC<IPostFormProps> = ({defaultData, setIsEditModalOpen}) => {
     const authData:IAutData|undefined = queryClient.getQueryData(["authme"]);
     const [isLoading, setIsloading] = useState(false)
     const [selectedFile, setSelectedFile] = useState<any>(null)
+    const [name, setName] = useState<any>('')
+
+    useEffect(() => {
+        if(defaultData && !selectedFile){
+            setName(defaultData?.url?.replace("/uploads/", ""))
+        }
+        if(selectedFile){
+            setName(selectedFile?.name)
+        }
+
+    }, [selectedFile, defaultData]);
+
 
     const handleFileUpload = async () =>{
         if(!selectedFile) return
         // @ts-ignore
         const formData = new FormData()
         formData.append('image', selectedFile);
-       return axios.post('/upload', formData)
+       return await axios.post('/upload', formData)
     }
 
     useEffect(() => {
-        console.log('selectedFile',selectedFile)
-    }, [selectedFile]);
-
+        console.log(selectedFile?.name || selectedFile?.replace("/uploads/", ""))
+    }, [selectedFile?.name,selectedFile]);
 
     const FormikSchema = yup.object().shape({
         title: yup.string().required('Required').min(5, 'Too Short!').max(50, 'Too Long!'),
@@ -56,40 +67,46 @@ const PostForm:FC<IPostFormProps> = ({defaultData, setIsEditModalOpen}) => {
                         content: defaultData?.content || '',
                     }}
                     validationSchema={FormikSchema}
-                    onSubmit={(values,{setSubmitting, resetForm}) => {
+                    onSubmit={async (values,{setSubmitting, resetForm}) => {
                         setIsloading(true)
-
-                            handleFileUpload().then(res=> {
-                                    console.log(res)
+                            let url = ''
+                            const promise = await handleFileUpload().then(res=> {
+                              url = res?.data.url || ''
                             })
-                        console.log('promise')
 
-                        //     if(defaultData) {
-                        //     axios.put(`/post`, {data:{
-                        //         id: defaultData.id,
-                        //         ...values
-                        //         }}).then((res) => {
-                        //         enqueueSnackbar('Post has been updated', {variant: 'success'})
-                        //         queryClient.refetchQueries(['posts'], { active: true })
-                        //         if(setIsEditModalOpen) {
-                        //             setIsEditModalOpen(false)
-                        //         }
-                        //         queryClient.refetchQueries(['posts'], { active: true })
-                        //     }).catch(()=>{
-                        //         enqueueSnackbar('Update post error', {variant: 'error'})
-                        //     })
-                        //     } else {
-                        //         axios.post('/post', {...values, userId: authData?.id}).then((res) => {
-                        //             enqueueSnackbar('Post has been created', {variant: 'success'})
-                        //             queryClient.refetchQueries(['posts'], { active: true })
-                        //             return res.data
-                        //         }).catch(()=>{
-                        //             enqueueSnackbar('Create post error', {variant: 'error'})
-                        //         })
-                        // }
-                        // resetForm()
-                        // setSubmitting(false);
-                        // setIsloading(false)
+                        Promise.all([promise]).then(()=> {
+                            if(defaultData) {
+                                const data: any = {
+                                    id: defaultData.id,
+                                    ...values
+                                }
+                                if(typeof url !== 'string'){
+                                    data.url = url
+                                }
+                                axios.put(`/post`, {data}).then((res) => {
+                                    enqueueSnackbar('Post has been updated', {variant: 'success'})
+                                    queryClient.refetchQueries(['posts'], { active: true })
+                                    if(setIsEditModalOpen) {
+                                        setIsEditModalOpen(false)
+                                    }
+                                    queryClient.refetchQueries(['posts'], { active: true })
+                                }).catch(()=>{
+                                    enqueueSnackbar('Update post error', {variant: 'error'})
+                                })
+                            } else {
+                                axios.post('/post', {...values, url, userId: authData?.id}).then((res) => {
+                                    enqueueSnackbar('Post has been created', {variant: 'success'})
+                                    queryClient.refetchQueries(['posts'], { active: true })
+                                    return res.data
+                                }).catch(()=>{
+                                    enqueueSnackbar('Create post error', {variant: 'error'})
+                                })
+                            }
+                            resetForm()
+                            setSubmitting(false);
+                            setSelectedFile(null)
+                            setIsloading(false)
+                        })
                     }}
                 >
                     {({
@@ -120,6 +137,10 @@ const PostForm:FC<IPostFormProps> = ({defaultData, setIsEditModalOpen}) => {
                                             fullWidth
                                             label={field.label}
                                             name={field.key}
+                                            multiline={!!field.type}
+                                            rows={field.type && 4}
+                                            maxRows={field.type && 8}
+                                            autoComplete={field.key}
                                             error={!!(errors[field.key] && touched[field.key] && dirty)}
                                             helperText={(errors[field.key] && touched[field.key]) && errors[field.key]}
                                             value={values[field.key]}
@@ -133,7 +154,7 @@ const PostForm:FC<IPostFormProps> = ({defaultData, setIsEditModalOpen}) => {
                                         fullWidth
                                         label={'Image file'}
                                         name={'fileName'}
-                                        value={selectedFile?.name}
+                                        value={name}
                                         InputLabelProps={{ shrink: true }}
                                         InputProps={{
                                             readOnly: true,

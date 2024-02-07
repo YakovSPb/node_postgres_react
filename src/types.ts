@@ -3,6 +3,7 @@ export type ICard = {
     title: string
     content: string
     user_id: number
+    url: string
 }
 
 export type IAutData = {
