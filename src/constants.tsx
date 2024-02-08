@@ -15,6 +15,9 @@ export const CAROUSEL_ITEMS = [
     },
     {
         img: <img className="w-full h-[500px] object-cover" src={'/images/slide_04.png'} alt={'slide_04'}/>
+    },
+    {
+        img: <img className="w-full h-[500px] object-cover" src={'/images/slide_05.png'} alt={'slide_05'}/>
     }
 ]
 
