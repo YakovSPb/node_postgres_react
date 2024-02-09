@@ -1,17 +1,45 @@
 import React, {FC} from "react";
 import Typography from "@mui/material/Typography";
+import { Grid } from "@mui/material";
 
 const Contact:FC = () => {
     return(
         <>
-            <Typography mt={10} gutterBottom variant="h5" component="div">Contact</Typography>
-            <Typography variant="body2" color="text.secondary">
-                Что такое Lorem Ipsum? Lorem Ipsum - это текст-"рыба", часто используемый в печати и вэб-дизайне.
-                Lorem Ipsum является стандартной "рыбой" для текстов на латинице с начала XVI века.
-                В то время некий безымянный печатник создал большую коллекцию размеров и форм шрифтов, используя Lorem Ipsum для распечатки образцов.
-                Lorem Ipsum не только успешно пережил без заметных изменений пять веков, но и перешагнул в электронный дизайн.
-                Его популяризации в новое время послужили публикация листов Letraset с образцами Lorem Ipsum в 60-х годах и, в более недавнее время, программы электронной вёрстки типа Aldus PageMaker, в шаблонах которых используется Lorem Ipsum.
-            </Typography>
+            <Typography mt={10} gutterBottom variant="h4" component="div">About</Typography>
+            <Grid container spacing={2}>
+                <Grid xs={6}>
+                    <Typography gutterBottom variant="h5" component="div">Front-end (React, Typescript)</Typography>
+                </Grid>
+                <Grid xs={6}>
+                    <Typography gutterBottom variant="h5" component="div">Back-end (Node.js Express.js)</Typography>
+                </Grid>
+                <Grid xs={6}>
+                    <ul>
+                        <li>material design</li>
+                        <li>axios</li>
+                        <li>formik</li>
+                        <li>notistack</li>
+                        <li>react-file-drop</li>
+                        <li>react-query</li>
+                        <li>react-router-do</li>
+                        <li>typescript</li>
+                        <li>yup</li>
+                        <li>tailwindcss</li>
+                    </ul>
+                </Grid>
+                <Grid xs={6}>
+                  <ul>
+                      <li>bcrypt</li>
+                      <li>cookie-parser</li>
+                      <li>cors</li>
+                      <li>jsonwebtoken</li>
+                      <li>follow-redirects</li>
+                      <li>multer</li>
+                      <li>pg</li>
+                      <li>nodemon</li>
+                  </ul>
+                </Grid>
+            </Grid>
         </>
     )
 }

@@ -15,7 +15,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { ReactComponent as Logo } from '../../assets/images/logo.svg';
 import {Link, useNavigate} from "react-router-dom";
 import {queryClient} from "../../index";
-import {PAGES, SETTINGS} from "../../constants";
+import {PAGES} from "../../constants";
 import {IAutData} from "../../types";
 
 const Header:FC = () =>  {
@@ -129,13 +129,13 @@ const Header:FC = () =>  {
                             open={Boolean(anchorElUser)}
                             onClose={handleCloseUserMenu}
                         >
-                            {SETTINGS.map((setting) => (
-                                <MenuItem key={setting.path} >
-                                    <Link to={setting.path}>
-                                        <Typography textAlign="center">{setting.label}</Typography>
-                                    </Link>
-                                </MenuItem>
-                            ))}
+                            {/*{SETTINGS.map((setting) => (*/}
+                            {/*    <MenuItem key={setting.path} >*/}
+                            {/*        <Link to={setting.path}>*/}
+                            {/*            <Typography textAlign="center">{setting.label}</Typography>*/}
+                            {/*        </Link>*/}
+                            {/*    </MenuItem>*/}
+                            {/*))}*/}
                                 {authData ?  <MenuItem><Typography onClick={logout} textAlign="center">Logout</Typography></MenuItem> :
                                     <MenuItem>
                                         <Link to='/login'>

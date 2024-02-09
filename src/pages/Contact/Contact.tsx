@@ -3,6 +3,7 @@ import Typography from "@mui/material/Typography";
 import {Grid} from "@mui/material";
 import {SOCIAL_MEDIA_LINKS} from "../../constants";
 import IconButton from "@mui/material/IconButton";
+import Box from "@mui/material/Box";
 
 const Contact:FC = () => {
     return(
@@ -19,6 +20,9 @@ const Contact:FC = () => {
                         </IconButton>
                     ))}
                 </Grid>
+                <Box className={'mt-5'}>
+                    <Typography>email: <a href="mailto:itmeetm@gmail.com">itmeetm@gmail.com</a></Typography>
+                </Box>
             </Typography>
         </>
     )

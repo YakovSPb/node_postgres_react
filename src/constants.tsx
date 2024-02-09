@@ -52,11 +52,6 @@ export const SOCIAL_MEDIA_LINKS = [
         link: '#',
         icon:  <InstagramIcon />
     },
-    {
-        label: 'hh',
-        link: 'https://hh.ru/resume/822d7a0bff05f790b50039ed1f613241424f67',
-        icon:  <span className='text-base'>hh.ru</span>
-    },
 ]
 
 export const REGISTER_FORM_FIELDS:IRegisterFormField[] = [
@@ -107,17 +102,17 @@ export const POST_FORM_FIELDS:IPostFormField[] = [
     },
 ]
 
-export const SETTINGS = [
-    {
-        label: 'Profile',
-        path: '/'
-    },
-    {
-        label: 'Account',
-        path: '/'
-    },
-    {
-        label: 'Dashboard',
-        path: '/'
-    },
-    ]
+// export const SETTINGS = [
+//     {
+//         label: 'Profile',
+//         path: '/'
+//     },
+//     {
+//         label: 'Account',
+//         path: '/'
+//     },
+//     {
+//         label: 'Dashboard',
+//         path: '/'
+//     },
+//     ]
